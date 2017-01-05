@@ -49,36 +49,31 @@ defmodule Bamboo.MailgunAdapter do
   end
 
   def deliver(email, config) do
-    task = Task.async(fn() -> deliver_internal(email, config) end)
-    res = Task.yield(task, 5000)
-    case res do
+    body = email |> to_mailgun_body |> Plug.Conn.Query.encode
+    task = Task.async(fn() -> deliver_internal(body, config) end)
+    
+    case Task.yield(task, 5000) do
       :nil ->
         IO.write("shutting down timed out email task: ")
         IO.inspect(task)
         Task.shutdown(task, :brutal_kill)
-      {:ok, status, headers, response} ->
-        %{status_code: status, headers: headers, body: response}
-      {:error, reason} ->
-        raise(ApiError, %{message: inspect(reason)})
-    end
-  end
-
-  def deliver_internal(email, config) do
-    body = email |> to_mailgun_body |> Plug.Conn.Query.encode
-
-    IO.puts "Mailgun adapter about to post #{inspect body} !"
-
-    case :hackney.post(full_uri(config), headers(config), body, [:with_body, ssl_options: [{:versions, [:'tlsv1.2']}] ]) do
       {:ok, status, _headers, response} when status > 299 ->
         IO.puts "Mailgun got error response #{inspect response} !"
         raise(ApiError, %{params: body, response: response})
       {:ok, status, headers, response} ->
         IO.puts "Mailgun got success response #{inspect response} !"
-        {:ok, status: status, headers: headers, response: response}
+        %{status_code: status, headers: headers, body: response}
       {:error, reason} ->
         IO.puts "Mailgun got error  #{inspect reason} !"
-        {:error, reason: reason}
+        raise(ApiError, %{message: inspect(reason)})
     end
+  end
+
+  def deliver_internal(body, config) do
+    
+
+    IO.puts "Mailgun adapter about to post #{inspect body} !"
+    :hackney.post(full_uri(config), headers(config), body, [:with_body])
   end
 
 
