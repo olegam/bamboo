@@ -1,5 +1,3 @@
-require Logger
-
 defmodule Bamboo.MailgunAdapter do
   @moduledoc """
   Sends email using Mailgun's API.
@@ -57,13 +55,13 @@ defmodule Bamboo.MailgunAdapter do
 
     case :hackney.post(full_uri(config), headers(config), body, [:with_body]) do
       {:ok, status, _headers, response} when status > 299 ->
-        Logger.debug "Mailgun got error response #{inspect response} !"
+        IO.puts "Mailgun got error response #{inspect response} !"
         raise(ApiError, %{params: body, response: response})
       {:ok, status, headers, response} ->
-        Logger.debug "Mailgun got success response #{inspect response} !"
+        IO.puts "Mailgun got success response #{inspect response} !"
         %{status_code: status, headers: headers, body: response}
       {:error, reason} ->
-        Logger.debug "Mailgun got error  #{inspect reason} !"
+        IO.puts "Mailgun got error  #{inspect reason} !"
         raise(ApiError, %{message: inspect(reason)})
     end
   end
