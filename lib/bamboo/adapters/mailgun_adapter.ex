@@ -49,6 +49,21 @@ defmodule Bamboo.MailgunAdapter do
   end
 
   def deliver(email, config) do
+    task1 = Task.async(fn() -> deliver_internal(email, config) end)
+    res = Task.yield(task1, 5000)
+    case res do
+      :nil ->
+        IO.write("shutting down timed out email task: ")
+        IO.inspect(task)
+        Task.shutdown(task, :brutal_kill)
+      {:ok, status, headers, response} ->
+        %{status_code: status, headers: headers, body: response}
+      {:error, reason} ->
+        raise(ApiError, %{message: inspect(reason)})
+    end
+  end
+
+  def deliver_internal(email, config do)
     body = email |> to_mailgun_body |> Plug.Conn.Query.encode
 
     IO.puts "Mailgun adapter about to post #{inspect body} !"
@@ -59,12 +74,13 @@ defmodule Bamboo.MailgunAdapter do
         raise(ApiError, %{params: body, response: response})
       {:ok, status, headers, response} ->
         IO.puts "Mailgun got success response #{inspect response} !"
-        %{status_code: status, headers: headers, body: response}
+        %{:ok, status, headers, response}
       {:error, reason} ->
         IO.puts "Mailgun got error  #{inspect reason} !"
-        raise(ApiError, %{message: inspect(reason)})
+        %{:error, reason}
     end
   end
+
 
   @doc false
   def handle_config(config) do
