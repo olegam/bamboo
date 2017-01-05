@@ -53,7 +53,7 @@ defmodule Bamboo.MailgunAdapter do
 
     IO.puts "Mailgun adapter about to post #{inspect body} !"
 
-    case :hackney.post(full_uri(config), headers(config), body, [:with_body]) do
+    case :hackney.post(full_uri(config), headers(config), body, [:with_body, ssl_options: [{:versions, [:'tlsv1.2']}] ]) do
       {:ok, status, _headers, response} when status > 299 ->
         IO.puts "Mailgun got error response #{inspect response} !"
         raise(ApiError, %{params: body, response: response})
