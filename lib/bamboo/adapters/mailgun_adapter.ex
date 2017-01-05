@@ -63,7 +63,7 @@ defmodule Bamboo.MailgunAdapter do
     end
   end
 
-  def deliver_internal(email, config do)
+  def deliver_internal(email, config) do
     body = email |> to_mailgun_body |> Plug.Conn.Query.encode
 
     IO.puts "Mailgun adapter about to post #{inspect body} !"
