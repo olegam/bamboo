@@ -51,7 +51,7 @@ defmodule Bamboo.MailgunAdapter do
   def deliver(email, config) do
     body = email |> to_mailgun_body |> Plug.Conn.Query.encode
 
-    Logger.debug "Mailgun adapter about to post #{inspect body} !"
+    IO.puts "Mailgun adapter about to post #{inspect body} !"
 
     case :hackney.post(full_uri(config), headers(config), body, [:with_body]) do
       {:ok, status, _headers, response} when status > 299 ->
