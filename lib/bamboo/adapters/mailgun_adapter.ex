@@ -74,10 +74,10 @@ defmodule Bamboo.MailgunAdapter do
         raise(ApiError, %{params: body, response: response})
       {:ok, status, headers, response} ->
         IO.puts "Mailgun got success response #{inspect response} !"
-        %{:ok, status, headers, response}
+        %{:ok, status: status, headers: headers, response: response}
       {:error, reason} ->
         IO.puts "Mailgun got error  #{inspect reason} !"
-        %{:error, reason}
+        %{:error, reason: reason}
     end
   end
 
