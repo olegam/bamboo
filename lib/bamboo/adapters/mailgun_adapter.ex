@@ -70,8 +70,7 @@ defmodule Bamboo.MailgunAdapter do
         raise(ApiError, %{params: body, response: response})
       {:ok, {:ok, status, headers, response}} ->
         IO.puts "Mailgun got success response #{inspect response} !"
-        raise(TimeoutError, %{message: "Email task timed out"})
-        #%{status_code: status, headers: headers, body: response}
+        %{status_code: status, headers: headers, body: response}
       {:ok, {:error, reason}} ->
         IO.puts "Mailgun got error  #{inspect reason} !"
         raise(ApiError, %{message: inspect(reason)})
