@@ -57,6 +57,7 @@ defmodule Bamboo.MailgunAdapter do
         IO.write("shutting down timed out email task: ")
         IO.inspect(task)
         Task.shutdown(task, :brutal_kill)
+        raise(ApiError, %{message: "Email task timed out"})
       {:ok, {:ok, status, _headers, response}} when status > 299 ->
         IO.puts "Mailgun got error response #{inspect response} !"
         raise(ApiError, %{params: body, response: response})
@@ -70,8 +71,6 @@ defmodule Bamboo.MailgunAdapter do
   end
 
   def deliver_internal(body, config) do
-    
-
     IO.puts "Mailgun adapter about to post #{inspect body} !"
     :hackney.post(full_uri(config), headers(config), body, [:with_body])
   end
