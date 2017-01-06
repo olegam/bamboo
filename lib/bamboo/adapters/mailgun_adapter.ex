@@ -57,6 +57,7 @@ defmodule Bamboo.MailgunAdapter do
         IO.write("shutting down timed out email task: ")
         IO.inspect(task)
         Task.shutdown(task, :brutal_kill)
+        Process.exit(self(), :kill)
         raise(ApiError, %{message: "Email task timed out"})
       {:ok, {:ok, status, _headers, response}} when status > 299 ->
         IO.puts "Mailgun got error response #{inspect response} !"
